@@ -17,36 +17,49 @@ roi = ee.Geometry.Rectangle([162.277817, -77.740157, 163.272100, -77.576571])
 start_date = "2016-03-06"
 end_date = "2025-01-01"
 
-# Select Landsat 8 Collection
-s2 = ee.ImageCollection('LANDSAT/LC08/C02/T2_TOA') \
-    .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']) \
-    .filterDate(start_date, end_date) \
-    .filterBounds(roi) \
-    .sort('DATE_ACQUIRED')
+ids = ee.List(['LANDSAT_8_2016-11-02', 'LANDSAT_8_2016-11-04', 'LANDSAT_8_2016-11-06', 'LANDSAT_8_2016-11-08', 'LANDSAT_8_2016-11-13', 'LANDSAT_8_2016-11-15', 'LANDSAT_8_2016-12-10', 'LANDSAT_8_2016-12-13', 'LANDSAT_8_2016-12-15', 'LANDSAT_8_2016-12-17', 'LANDSAT_8_2016-12-19', 'LANDSAT_8_2016-12-24', 'LANDSAT_8_2017-01-02', 'LANDSAT_8_2017-01-11', 'LANDSAT_8_2017-01-14', 'LANDSAT_8_2017-01-18', 'LANDSAT_8_2017-01-25', 'LANDSAT_8_2017-01-27', 'LANDSAT_8_2017-01-30', 'LANDSAT_8_2017-02-01', 'LANDSAT_8_2017-11-04', 'LANDSAT_8_2017-11-07', 'LANDSAT_8_2017-11-18', 'LANDSAT_8_2017-11-20', 'LANDSAT_8_2017-11-21', 'LANDSAT_8_2017-11-25', 'LANDSAT_8_2017-11-27', 'LANDSAT_8_2017-11-30', 'LANDSAT_8_2017-12-02', 'LANDSAT_8_2017-12-07', 'LANDSAT_8_2017-12-16', 'LANDSAT_8_2017-12-23', 'LANDSAT_8_2018-01-03', 'LANDSAT_8_2018-01-05', 'LANDSAT_8_2018-01-07', 'LANDSAT_8_2018-01-10', 'LANDSAT_8_2018-01-12', 'LANDSAT_8_2018-01-14', 'LANDSAT_8_2018-01-19', 'LANDSAT_8_2018-01-26', 'LANDSAT_8_2018-01-30', 'LANDSAT_8_2018-11-05', 'LANDSAT_8_2018-11-07', 'LANDSAT_8_2018-11-08', 'LANDSAT_8_2018-11-12', 'LANDSAT_8_2018-11-17', 'LANDSAT_8_2018-11-19', 'LANDSAT_8_2018-11-23', 'LANDSAT_8_2018-11-24', 'LANDSAT_8_2018-11-26', 'LANDSAT_8_2018-11-28', 'LANDSAT_8_2018-11-30', 'LANDSAT_8_2018-12-05', 'LANDSAT_8_2018-12-30', 'LANDSAT_8_2019-01-01', 'LANDSAT_8_2019-01-04', 'LANDSAT_8_2019-01-06', 'LANDSAT_8_2019-01-10', 'LANDSAT_8_2019-01-11', 'LANDSAT_8_2019-01-15', 'LANDSAT_8_2019-01-24', 'LANDSAT_8_2019-01-26', 'LANDSAT_8_2019-11-06', 'LANDSAT_8_2019-11-08', 'LANDSAT_8_2019-11-10', 'LANDSAT_8_2019-11-11', 'LANDSAT_8_2019-11-15', 'LANDSAT_8_2019-11-17', 'LANDSAT_8_2019-11-24', 'LANDSAT_8_2019-11-26', 'LANDSAT_8_2019-11-27', 'LANDSAT_8_2019-12-03', 'LANDSAT_8_2019-12-17', 'LANDSAT_8_2019-12-24', 'LANDSAT_8_2019-12-26', 'LANDSAT_8_2019-12-31', 'LANDSAT_8_2020-01-02', 'LANDSAT_8_2020-01-11', 'LANDSAT_8_2020-01-20', 'LANDSAT_8_2020-10-30', 'LANDSAT_8_2020-11-15', 'LANDSAT_8_2020-11-17', 'LANDSAT_8_2020-11-19', 'LANDSAT_8_2020-11-24', 'LANDSAT_8_2020-11-26', 'LANDSAT_8_2020-11-28', 'LANDSAT_8_2020-11-29', 'LANDSAT_8_2020-12-01', 'LANDSAT_8_2020-12-03', 'LANDSAT_8_2020-12-08', 'LANDSAT_8_2020-12-10', 'LANDSAT_8_2020-12-14', 'LANDSAT_8_2020-12-15', 'LANDSAT_8_2020-12-21', 'LANDSAT_8_2020-12-24', 'LANDSAT_8_2020-12-26', 'LANDSAT_8_2020-12-30', 'LANDSAT_8_2021-01-06', 'LANDSAT_8_2021-01-13', 'LANDSAT_8_2021-01-15', 'LANDSAT_8_2021-01-16', 'LANDSAT_8_2021-01-18', 'LANDSAT_8_2021-01-22', 'LANDSAT_8_2021-02-01', 'LANDSAT_8_2021-10-31', 'LANDSAT_8_2021-11-04', 'LANDSAT_8_2021-11-09', 'LANDSAT_8_2021-11-11', 'LANDSAT_8_2021-11-15', 'LANDSAT_8_2021-11-20', 'LANDSAT_8_2021-12-01', 'LANDSAT_8_2021-12-02', 'LANDSAT_8_2021-12-04', 'LANDSAT_8_2021-12-06', 'LANDSAT_8_2021-12-08', 'LANDSAT_8_2021-12-11', 'LANDSAT_8_2021-12-18', 'LANDSAT_8_2021-12-20', 'LANDSAT_8_2021-12-22', 'LANDSAT_8_2021-12-24', 'LANDSAT_8_2022-01-05', 'LANDSAT_8_2022-01-07', 'LANDSAT_8_2022-01-12', 'LANDSAT_8_2022-01-14', 'LANDSAT_8_2022-01-16', 'LANDSAT_8_2022-01-19', 'LANDSAT_8_2022-01-25', 'LANDSAT_8_2022-01-28', 'LANDSAT_8_2022-11-14', 'LANDSAT_8_2022-11-16', 'LANDSAT_8_2022-11-18', 'LANDSAT_8_2022-11-19', 'LANDSAT_8_2022-11-21', 'LANDSAT_8_2022-11-23', 'LANDSAT_8_2022-11-28', 'LANDSAT_8_2022-12-04', 'LANDSAT_8_2022-12-05', 'LANDSAT_8_2022-12-11', 'LANDSAT_8_2022-12-16', 'LANDSAT_8_2022-12-18', 'LANDSAT_8_2023-01-01', 'LANDSAT_8_2023-01-03', 'LANDSAT_8_2023-01-10', 'LANDSAT_8_2023-01-15', 'LANDSAT_8_2023-01-22', 'LANDSAT_8_2023-01-24', 'LANDSAT_8_2023-11-01', 'LANDSAT_8_2023-11-17', 'LANDSAT_8_2023-11-19', 'LANDSAT_8_2023-11-21', 'LANDSAT_8_2023-12-05', 'LANDSAT_8_2023-12-07', 'LANDSAT_8_2023-12-10', 'LANDSAT_8_2023-12-19', 'LANDSAT_8_2023-12-28', 'LANDSAT_8_2023-12-30', 'LANDSAT_8_2024-01-04', 'LANDSAT_8_2024-01-11', 'LANDSAT_8_2024-01-13', 'LANDSAT_8_2024-01-22', 'LANDSAT_8_2024-01-24'])
 
-# Create a mosaic by date
+def addImageDate(image):
+    mission = image.get('SPACECRAFT_ID')
+    date = image.date().format('YYYY-MM-dd')
+    missDate = ee.String(mission).cat('_').cat(ee.String(date))
+    return image.set('missDate', missDate)
+
 def mosaic_by_date(imcol):
-    """
-    Create a mosaic for each unique date in the image collection.
-    """
+    # Convert the image collection to a list of images
     imlist = imcol.toList(imcol.size())
-
+    
+    # Get unique dates from the image collection
     def get_date(image):
         return ee.Image(image).date().format("YYYY-MM-dd")
-
+    
     unique_dates = imlist.map(lambda im: get_date(im)).distinct()
 
     def create_mosaic(date_str):
         date = ee.Date(date_str)
+        
+        # Filter images for that day and create a mosaic
         mosaic = imcol.filterDate(date, date.advance(1, 'day')).mosaic()
+        
         return mosaic.set({
             'system:time_start': date.millis(),
             'system:id': date.format('YYYY-MM-dd')
         })
 
+    # Create mosaics for each unique date
     mosaic_imlist = unique_dates.map(create_mosaic)
+    
     return ee.ImageCollection(mosaic_imlist)
 
+# Example usage with an image collection (e.g., 'LANDSAT/LC08/C02/T1_L2')
+s2 = ee.ImageCollection('LANDSAT/LC08/C02/T2_TOA')\
+    .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'])\
+    .filterDate(start_date, end_date)\
+    .map(addImageDate)\
+    .filter(ee.Filter.inList("missDate", ids))\
+    .filter(ee.Filter.gt('SUN_ELEVATION',20))\
+    .filterBounds(roi)\
+    .sort('DATE_ACQUIRED')
 s3 = mosaic_by_date(s2)
 
 # Clip all the images in the s3 collection down to the ROI
@@ -55,6 +68,8 @@ def clip_image(image):
 
 # Apply clip to image collection
 l8_clipped = s3.map(clip_image)
+
+print(l8_clipped.size().getInfo())
 
 ## Define the Soil Endmember
 # define soil endmember from a single image
@@ -223,84 +238,3 @@ unmixed_image = soil1.unmix(unmix_endmembers, True, True)
 print(unmixed_image.getInfo())
 
 #if you run everything individually, it works. In function form in the above portion of the script, it does not. 
-
-
-## script try again
-import ee
-import numpy as np
-
-# Authenticate and initialize Earth Engine
-ee.Authenticate()
-ee.Initialize()
-
-# Define ROIs
-roi_soil = ee.Geometry.Rectangle([163.078070, -77.625204, 163.07800, -77.625340])
-roi = ee.Geometry.Rectangle([162.277817, -77.740157, 163.272100, -77.576571])
-
-# Define date range
-start_date = "2016-03-06"
-end_date = "2025-01-01"
-
-# Select Landsat 8 Collection
-s2 = ee.ImageCollection('LANDSAT/LC08/C02/T2_TOA') \
-    .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']) \
-    .filterDate(start_date, end_date) \
-    .filterBounds(roi) \
-    .sort('DATE_ACQUIRED')
-
-def mosaic_by_date(imcol):
-    """Create a mosaic for each unique date in the image collection."""
-    def get_date(image):
-        return ee.Image(image).date().format("YYYY-MM-dd")
-
-    def create_mosaic(date_str):
-        date = ee.Date(date_str)
-        mosaic = imcol.filterDate(date, date.advance(1, 'day')).mosaic()
-        return mosaic.set({
-            'system:time_start': date.millis(),
-            'system:id': date.format('YYYY-MM-dd')
-        })
-
-    unique_dates = imcol.map(get_date).distinct()
-    return ee.ImageCollection(unique_dates.map(create_mosaic))
-
-s3 = mosaic_by_date(s2)
-
-# Clip all images in the s3 collection to the ROI
-l8_clipped = s3.map(lambda image: image.clip(roi))
-
-# Define soil endmember
-soil1 = ee.Image('LANDSAT/LC08/C02/T2_TOA/LC08_055116_20231205').select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'])
-soil = soil1.clip(roi_soil)
-soil_mean_defined = soil.reduceRegion(ee.Reducer.mean()).values()
-
-def select_brightest_pixels(image, roi, n=10):
-    """Select the n brightest pixels from the image based on brightness."""
-    brightness = image.select(['B6']).reduce(ee.Reducer.sum())
-    sampled_points = brightness.sample(region=roi, scale=30, numPixels=1000)
-    sorted_points = sampled_points.sort('sum', False)
-    return sorted_points.limit(n)
-
-def get_average_of_brightest(image, roi, n=10):
-    brightest_points = select_brightest_pixels(image, roi, n)
-    bands = image.bandNames()
-    return ee.List(bands.map(lambda band: brightest_points.aggregate_mean(band)))
-
-def define_endmembers(image, roi, roi_soil, n=10):
-    brightest_pixel_means = get_average_of_brightest(image, roi, n)
-    return [brightest_pixel_means, soil_mean_defined]
-
-def perform_unmixing(image, endmembers):
-    unmixed_image = image.unmix(endmembers, True, True)
-    return unmixed_image.set('system:time_start', image.get('system:time_start'))
-
-def process_images(image):
-    endmembers = define_endmembers(image, roi, roi_soil)
-    return perform_unmixing(image, endmembers)
-
-# Apply the process_images function to the filtered image collection l8_clipped
-processed_images = l8_clipped.map(process_images)
-
-# Print processed image information
-first_image = processed_images.first()
-print(first_image.get('system:id').getInfo())
