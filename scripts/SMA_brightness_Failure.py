@@ -86,16 +86,10 @@ def select_brightest_pixels(image, roi, n=10):
 
     # Select the top n brightest points
     top_n_brightest_points = sorted_points.limit(n)
-    
     return top_n_brightest_points
 
 # Function to get average of brightest pixels (Server-side operation only)
 def get_average_of_brightest(image, roi, n=10):
-    """
-    For the top n brightest pixels, calculate the mean value for each band.
-    This will return a list of mean values, one for each band, such as:
-    [0.1, 0.2, 0.3, ..., 0.7]
-    """
     # Select the brightest pixels
     brightest_points = select_brightest_pixels(image, roi, n)
 
@@ -134,17 +128,6 @@ def define_endmembers(image, roi, roi_soil, n=10):
 
 # Function to perform spectral unmixing
 def perform_unmixing(image, endmembers):
-    """
-    Performs spectral unmixing using the provided endmembers.
-
-    Args:
-      image: The input image.
-      endmembers: A list containing two lists of endmember values.
-
-    Returns:
-      The unmixed image.
-    """
-
     # Extract endmembers from the list
     brightest_pixel_means = endmembers[0]
     soil_mean = endmembers[1]
@@ -240,3 +223,84 @@ unmixed_image = soil1.unmix(unmix_endmembers, True, True)
 print(unmixed_image.getInfo())
 
 #if you run everything individually, it works. In function form in the above portion of the script, it does not. 
+
+
+## script try again
+import ee
+import numpy as np
+
+# Authenticate and initialize Earth Engine
+ee.Authenticate()
+ee.Initialize()
+
+# Define ROIs
+roi_soil = ee.Geometry.Rectangle([163.078070, -77.625204, 163.07800, -77.625340])
+roi = ee.Geometry.Rectangle([162.277817, -77.740157, 163.272100, -77.576571])
+
+# Define date range
+start_date = "2016-03-06"
+end_date = "2025-01-01"
+
+# Select Landsat 8 Collection
+s2 = ee.ImageCollection('LANDSAT/LC08/C02/T2_TOA') \
+    .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']) \
+    .filterDate(start_date, end_date) \
+    .filterBounds(roi) \
+    .sort('DATE_ACQUIRED')
+
+def mosaic_by_date(imcol):
+    """Create a mosaic for each unique date in the image collection."""
+    def get_date(image):
+        return ee.Image(image).date().format("YYYY-MM-dd")
+
+    def create_mosaic(date_str):
+        date = ee.Date(date_str)
+        mosaic = imcol.filterDate(date, date.advance(1, 'day')).mosaic()
+        return mosaic.set({
+            'system:time_start': date.millis(),
+            'system:id': date.format('YYYY-MM-dd')
+        })
+
+    unique_dates = imcol.map(get_date).distinct()
+    return ee.ImageCollection(unique_dates.map(create_mosaic))
+
+s3 = mosaic_by_date(s2)
+
+# Clip all images in the s3 collection to the ROI
+l8_clipped = s3.map(lambda image: image.clip(roi))
+
+# Define soil endmember
+soil1 = ee.Image('LANDSAT/LC08/C02/T2_TOA/LC08_055116_20231205').select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'])
+soil = soil1.clip(roi_soil)
+soil_mean_defined = soil.reduceRegion(ee.Reducer.mean()).values()
+
+def select_brightest_pixels(image, roi, n=10):
+    """Select the n brightest pixels from the image based on brightness."""
+    brightness = image.select(['B6']).reduce(ee.Reducer.sum())
+    sampled_points = brightness.sample(region=roi, scale=30, numPixels=1000)
+    sorted_points = sampled_points.sort('sum', False)
+    return sorted_points.limit(n)
+
+def get_average_of_brightest(image, roi, n=10):
+    brightest_points = select_brightest_pixels(image, roi, n)
+    bands = image.bandNames()
+    return ee.List(bands.map(lambda band: brightest_points.aggregate_mean(band)))
+
+def define_endmembers(image, roi, roi_soil, n=10):
+    brightest_pixel_means = get_average_of_brightest(image, roi, n)
+    return [brightest_pixel_means, soil_mean_defined]
+
+def perform_unmixing(image, endmembers):
+    unmixed_image = image.unmix(endmembers, True, True)
+    return unmixed_image.set('system:time_start', image.get('system:time_start'))
+
+def process_images(image):
+    endmembers = define_endmembers(image, roi, roi_soil)
+    return perform_unmixing(image, endmembers)
+
+# Apply the process_images function to the filtered image collection l8_clipped
+processed_images = l8_clipped.map(process_images)
+
+# Print processed image information
+first_image = processed_images.first()
+print(first_image.get('system:id').getInfo())
