@@ -1,0 +1,68 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 // You're limited to how much data you can grab at once. \
+// Here I run this four different times with different time windows. \
+// Change output at bottom. \
+\
+// var dataset = ee.ImageCollection('MODIS/006/MOD10A1')\
+//                   .filter(ee.Filter.date('2000-01-01', '2006-12-31'));\
+// var dataset = ee.ImageCollection('MODIS/006/MOD10A1')\
+//                   .filter(ee.Filter.date('2007-01-01', '2014-12-31'));\
+// var dataset = ee.ImageCollection('MODIS/006/MOD10A1')\
+//                   .filter(ee.Filter.date('2015-01-01', '2022-02-13'));\
+var dataset = ee.ImageCollection('MODIS/006/MOD10A1')\
+                  .filter(ee.Filter.date('2022-02-15', '2025-02-10'));\
+var snowCover = dataset.select('Snow_Albedo_Daily_Tile_Class');\
+\
+\
+// var arcticPoint = [163.12587, -77.6144552]; // Lake Frxyell\
+// var arcticPoint = [162.30928, -77.7153848]; // West Lake Bonney\
+// var arcticPoint = [162.419764, -77.713605]; // East Lake Bonney\
+// var arcticPoint = [162.902544, -77.62817]; // Lake Hoare\
+\
+var arcticPointGeom = ee.Geometry.MultiPoint([\
+[163.12587, -77.6144552], // LF\
+[162.30928, -77.7153848], // WLB (east)\
+[162.299926, -77.718130], // WLB (west)\
+[162.419764, -77.713605], // ELB (west)\
+[162.459966, -77.707210], // ELB (east)\
+[162.902544, -77.62817]]); // LH\
+\
+// var arcticPointGeom = ee.Geometry.Point(arcticPoint[0], arcticPoint[1]);\
+\
+\
+// Extract value at the point\
+var point_values = dataset.getRegion(arcticPointGeom,500).getInfo();\
+\
+// Print the result\
+print('Extracted values at the point', point_values);\
+\
+\
+// Export point values as csv\
+// Export.table.toDrive(\{\
+//   collection: ee.FeatureCollection(ee.Feature(arcticPointGeom, \{values: point_values\})),\
+//   description: 'MODIS_point_values',\
+//   fileFormat: 'CSV'\
+// \});\
+\
+var myFeatures = ee.FeatureCollection(point_values.map(function(el)\{\
+  el = ee.List(el); // cast every element of the list\
+\
+  return ee.Feature(null, \{\
+    'dictionary': el\
+  \});\
+\}));\
+\
+Export.table.toDrive(\{\
+  collection: myFeatures,\
+  folder: 'GEE',\
+  description:'MODIS_multi4',\
+  selectors:['dictionary'],\
+  fileFormat: 'CSV'\
+\});\
+}
